@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Go Load Dashboard</title>
+  <link rel="stylesheet" href="/static/main.css">
+</head>
+<body>
+  <h1>📊 Live Dashboard</h1>
+  <div id="container"></div>
+
+  <script>
+    const evtSource = new EventSource("/events");
+    evtSource.onmessage = function(event) {
+      const data = JSON.parse(event.data);
+      const container = document.getElementById("container");
+      container.innerHTML = "";
+
+      const sorted = Object.entries(data).sort((a, b) => b[1].Total - a[1].Total);
+      for (const [client, info] of sorted) {
+        container.innerHTML += `
+          <div class="card">
+            <h2>${client}</h2>
+            <p><strong>Всего:</strong> ${info.Total}</p>
+            <p><strong>Сообщение:</strong> ${info.LastMsg}</p>
+            <p><strong>Скорость:</strong> ${info.Speed.toFixed(2)} req/s</p>
+          </div>
+        `;
+      }
+    };
+  </script>
+</body>
+</html>
